@@ -11,12 +11,41 @@ android {
         minSdk 26
         targetSdk 34
         versionCode 1
-        versionName '0.1'
+        versionName '0.1.0'
+    }
+
+    // Release 签名：从 ~/.gradle/gradle.properties（或 -P 参数）读取，密钥不进仓库。
+    // 没有配置时 release 包不签名，debug 包不受影响。
+    signingConfigs {
+        release {
+            if (project.hasProperty('ZJ_STORE_FILE')) {
+                storeFile file(ZJ_STORE_FILE)
+                storePassword ZJ_STORE_PASSWORD
+                keyAlias ZJ_KEY_ALIAS
+                keyPassword ZJ_KEY_PASSWORD
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (project.hasProperty('ZJ_STORE_FILE')) {
+                signingConfig signingConfigs.release
+            }
+        }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+
+    // 输出文件名：zwift-joypad-<版本>-<构建类型>.apk
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach {
+            outputFileName = "zwift-joypad-${variant.versionName}-${variant.buildType.name}.apk"
+        }
     }
 }
 
