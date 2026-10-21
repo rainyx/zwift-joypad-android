@@ -1,0 +1,26 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.zwiftjoystick'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.zwiftjoystick'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '0.1'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    // AES-CCM + HKDF（Android 自带的 JCE 不支持 CCM）
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
+}
