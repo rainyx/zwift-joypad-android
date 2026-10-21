@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 页面标题 -->
+    <string name="title_settings">设置</string>
+    <string name="title_log">日志</string>
+    <string name="title_about">关于</string>
+
+    <!-- 主界面 -->
+    <string name="menu_start">开始广播</string>
+    <string name="menu_stop">停止广播</string>
+    <string name="menu_restart">重新开始广播</string>
+    <string name="menu_battery">发送电量</string>
+    <string name="menu_log">日志</string>
+    <string name="menu_settings">设置</string>
+    <string name="menu_about">关于</string>
+    <string name="hint_idle">长按空白处查看按键说明</string>
+    <string name="unassigned">未分配</string>
+    <string name="paddle_hint_left">◀ 左倾转向 · 右倾刹车 ▶</string>
+    <string name="paddle_hint_right">◀ 左倾刹车 · 右倾转向 ▶</string>
+    <string name="side_left">左</string>
+    <string name="side_right">右</string>
+    <string name="side_both">双侧</string>
+    <string name="custom_wave">自定义波形</string>
+
+    <!-- 设置 -->
+    <string name="settings_header">手柄设置</string>
+    <string name="settings_header_desc">选择要模拟的 Zwift 设备，并配置每个按键发送的 ZP 键码。</string>
+    <string name="restart_prompt">设备模拟参数已修改，需要重新开始广播才生效。现在重启广播吗？</string>
+    <string name="restart_adv">重启广播</string>
+    <string name="later">稍后</string>
+    <string name="card_device">设备模拟（Controller）</string>
+    <string name="preset">预设</string>
+    <string name="preset_desc">Ride 用 0x23 明文；Play/Click 走加密握手</string>
+    <string name="adv_type">广播类型 (hex)</string>
+    <string name="adv_type_desc">厂商数据 4A 09 &lt;类型&gt;；02/03/06/09 触发加密</string>
+    <string name="product_id">产品 ID</string>
+    <string name="product_id_desc">决定 Zwift 加载的绑定：8 Ride · 11 Click · 14 Play</string>
+    <string name="device_name">设备名称</string>
+    <string name="device_name_desc">广播名（每次广播前把手机蓝牙名改成它）+ DevInfo 名称</string>
+    <string name="encryption">加密</string>
+    <string name="report_msg">上报消息</string>
+    <string name="report_msg_desc">按键通知使用的 opcode</string>
+    <string name="card_buttons">按键（Buttons）</string>
+    <string name="card_dpad">方向键（D-Pad）</string>
+    <string name="card_shoulder">肩键（Shoulder Buttons）</string>
+    <string name="paddle_range">拨片满量程</string>
+    <string name="paddle_range_desc">写入输入配置 DO 0x0400 的校准 min/max（10–100）</string>
+    <string name="zl_paddle">ZL 拨片</string>
+    <string name="zr_paddle">ZR 拨片</string>
+    <string name="zl_paddle_desc">左倾 转向 / 右倾 刹车（默认 LH）</string>
+    <string name="zr_paddle_desc">右倾 转向 / 左倾 刹车（默认 RH）</string>
+    <string name="invert">反向</string>
+    <string name="card_look">外观</string>
+    <string name="bg_theme">主界面背景</string>
+    <string name="bg_theme_desc">Zwift 橙 / 深色 / 浅色（会记住选择）</string>
+    <string name="key_style">按键外观</string>
+    <string name="key_style_desc">仿真：还原手柄机身；简约：只保留按键并放大，方便触摸（不影响 ZL/ZR）</string>
+    <string name="language">语言 / Language</string>
+    <string name="language_desc">跟随系统：使用手机语言，不支持时使用英文</string>
+    <string name="card_feedback">反馈与行为</string>
+    <string name="vibrate">手机震动</string>
+    <string name="vibrate_desc">收到 Zwift 0x12 震动请求时振动</string>
+    <string name="event_toast">事件提示</string>
+    <string name="event_toast_desc">主界面顶部显示 Zwift 事件（碰撞、RideOn…）</string>
+    <string name="auto_start">启动时自动广播</string>
+    <string name="auto_start_desc">打开 App 即开始 BLE 广播</string>
+    <string name="hold_guide">长按显示Guide</string>
+    <string name="hold_guide_desc">长按主界面空白处显示按键说明，松开隐藏</string>
+    <string name="reset_defaults">恢复默认设置</string>
+    <string name="reset_confirm">恢复所有设置为默认值？</string>
+    <string name="reset_ok">恢复</string>
+    <string name="reset_done">已恢复默认</string>
+    <string name="cancel">取消</string>
+    <string name="bad_number">广播类型 / 产品 ID 格式错误，未保存</string>
+
+    <string-array name="lang_options">
+        <item>跟随系统</item>
+        <item>English</item>
+        <item>中文</item>
+    </string-array>
+    <string-array name="bg_themes">
+        <item>Zwift 橙</item>
+        <item>深色</item>
+        <item>浅色</item>
+    </string-array>
+    <string-array name="key_styles">
+        <item>仿真</item>
+        <item>简约</item>
+    </string-array>
+    <string-array name="presets">
+        <item>Zwift Ride（明文）</item>
+        <item>Zwift Play（加密）</item>
+        <item>Zwift Click（加密）</item>
+        <item>自定义</item>
+    </string-array>
+    <string-array name="digital_labels">
+        <item>上 ∧</item>
+        <item>左 &lt;</item>
+        <item>下 ∨</item>
+        <item>右 &gt;</item>
+        <item>Y</item>
+        <item>A</item>
+        <item>B</item>
+        <item>Z</item>
+        <item>LS</item>
+        <item>RS</item>
+    </string-array>
+    <string-array name="keycode_actions">
+        <item>路口左转</item>
+        <item>动作栏</item>
+        <item>路口右转</item>
+        <item>掉头(长按)</item>
+        <item>选择</item>
+        <item>返回/菜单</item>
+        <item>使用道具</item>
+        <item>RideOn(长按炸弹)</item>
+        <item>减档 / 降强度</item>
+        <item>减档</item>
+        <item>drops 绑定</item>
+        <item>左电源键</item>
+        <item>加档 / 升强度</item>
+        <item>加档</item>
+        <item>drops 绑定</item>
+        <item>右电源键</item>
+    </string-array>
+    <string name="key_none">不发送</string>
+    <string-array name="analog_names">
+        <item>LH 左横向 (0x10)</item>
+        <item>RH 右横向 (0x11)</item>
+        <item>LV 左纵向 (0x12)</item>
+        <item>RV 右纵向 (0x13)</item>
+        <item>不发送</item>
+    </string-array>
+
+    <!-- 日志 -->
+    <string name="copy">复制</string>
+    <string name="copied">已复制</string>
+    <string name="clear">清空</string>
+
+    <!-- 关于 -->
+    <string name="version_fmt">版本 %1$s</string>
+    <string name="author">作者</string>
+    <string name="features">功能介绍</string>
+    <string name="disclaimer">免责声明</string>
+    <string-array name="feature_list">
+        <item>把手机模拟成 Zwift 手柄，通过蓝牙直接连接 Zwift，无需额外硬件或电脑端软件</item>
+        <item>完整按键：方向键、Y / Z / A / B、−/＋ 换挡，ZL / ZR 拨片转向与刹车，支持多点触控</item>
+        <item>接收 Zwift 下发的游戏事件（碰撞、RideOn、道具…），顶部提示并震动</item>
+        <item>仿真 / 简约两种按键外观，Zwift 橙 / 深色 / 浅色三种背景</item>
+        <item>长按空白处查看每个按键对应的 Zwift 动作</item>
+        <item>每个按键可自定义键码，拨片可选通道、反向和满量程</item>
+        <item>协议日志，方便排查连接问题</item>
+    </string-array>
+    <string-array name="disclaimer_list">
+        <item>本软件仅供学习与技术研究使用，切勿用于任何商业用途。</item>
+        <item>本软件是个人开源项目，与 Zwift, Inc. 无任何关联，也未获其授权或认可；Zwift 及相关产品名称、商标归其各自所有者。</item>
+        <item>使用本软件产生的任何后果（包括但不限于账号、设备、数据方面的问题）由使用者自行承担，作者不承担任何责任。</item>
+        <item>本软件按“原样”提供，不附带任何明示或暗示的担保。</item>
+    </string-array>
+
+    <!-- 连接状态 -->
+    <string name="state_not_started">未启动</string>
+    <string name="state_stopped">已停止</string>
+    <string name="state_gatt_ready">GATT 服务已创建</string>
+    <string name="state_advertising">广播中，等待 Zwift 连接…</string>
+    <string name="state_adv_failed">广播失败 code=%1$d</string>
+    <string name="state_connected">已连接 Zwift</string>
+    <string name="state_handshake_done">握手完成，等待 Zwift 读取设备信息</string>
+    <string name="state_reading_info">Zwift 正在读取设备信息…</string>
+    <string name="state_ready">已连接 Zwift，可以开始操作</string>
+
+    <!-- 协议日志 -->
+    <string name="log_bt_off">蓝牙未开启</string>
+    <string name="log_no_adv">此设备不支持 BLE 外设广播</string>
+    <string name="log_rename">手机蓝牙名 %1$s → %2$s</string>
+    <string name="log_rename_timeout">警告: 3 秒内蓝牙名未变为 %1$s（当前 %2$s），仍开始广播</string>
+    <string name="log_adv_paused">已连接，暂停广播</string>
+    <string name="log_adv">广播: %1$s, ZP 服务数据[02], FC82, 厂商数据 4A 09 %2$s%3$s</string>
+    <string name="log_mode_enc">（加密模式）</string>
+    <string name="log_mode_plain">（明文）</string>
+    <string name="log_link_up">链路连接: %1$s（可能是本 App，也可能是同机其它 BLE App 的连接）</string>
+    <string name="log_link_down">链路断开: %1$s%2$s</string>
+    <string name="log_session_end">（ZP 会话结束）</string>
+    <string name="log_write">写 %1$s: %2$s</string>
+    <string name="log_subscribe">订阅 %1$s = %2$s</string>
+    <string name="log_frame_long">警告: 帧长 %1$d > MTU-3 (%2$d)，会被截断</string>
+    <string name="log_encrypt_fail">加密失败: %1$s</string>
+    <string name="log_decrypt_fail">解密失败: %1$s raw=%2$s</string>
+    <string name="log_trainer_cmd">"  ⚠ Zwift 在这条连接上发了骑行台控制指令（opcode %1$s）：它把这条连接当成了 ZP 骑行台，通常是因为在 Zwift 里选了同机其它 App 的设备"</string>
+    <string name="log_bad_rideon">非法 RideOn: %1$s</string>
+    <string name="log_rideon">RX RideOn 握手（%1$s），Zwift 协议版本 %2$s%3$s</string>
+    <string name="log_rideon_key">，附带公钥 %1$dB</string>
+    <string name="log_no_pubkey">加密模式但 Zwift 没发公钥（该广播类型在 Zwift 侧是明文？）</string>
+    <string name="log_kdf_fail">ECDH/HKDF 失败: %1$s</string>
+    <string name="log_key_ready">已派生 AES-256-CCM 会话密钥</string>
+    <string name="log_tx_rideon">TX RideOn 应答 %1$s%2$s</string>
+    <string name="log_get">GET DO 0x%1$04X → 应答 %2$dB</string>
+    <string name="log_ctrl_req">"  ControllerRequest(非震动): %1$s"</string>
+    <string name="log_haptic_f2">"  HapticRequest.f2 = %1$s（疑似停止/模式）"</string>
+    <string name="log_haptic_event">"  ★ 震动事件: %1$s%2$s%3$s%4$s"</string>
+    <string name="log_loop">" 循环 "</string>
+
+    <!-- Zwift 震动事件 -->
+    <string name="haptic_collision">COLLISION（碰撞）</string>
+    <string name="haptic_road_extent">ROAD_EXTENT（压路边）</string>
+    <string name="haptic_return_rideon">RETURN_RIDEON（回 RideOn）</string>
+    <string name="haptic_bomb_rideon">BOMB_RIDEON（RideOn 炸弹）</string>
+    <string name="haptic_shift_extent">SHIFT_EXTENT（档位到头）</string>
+    <string name="haptic_connected">CONNECTED（已连接）</string>
+    <string name="haptic_speed_boost">SPEED_BOOST（加速）</string>
+    <string name="haptic_use_powerup">USE_POWERUP（使用道具）</string>
+    <string name="haptic_snow_dirt">HAZARD_SNOW/DIRT（雪地/泥地）</string>
+    <string name="haptic_hazard">HAZARD_GENERAL（路面危险）</string>
+    <string name="haptic_unknown">未知事件</string>
+</resources>

@@ -15,7 +15,8 @@
     <application
         android:name=".App"
         android:label="Zwift Joystick"
-        android:icon="@android:drawable/ic_menu_compass"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@android:style/Theme.Material">
         <activity
             android:name=".MainActivity"
@@ -30,10 +31,13 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="设置"
+            android:label="@string/title_settings"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".LogActivity"
-            android:label="日志" />
+            android:label="@string/title_log" />
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/title_about" />
     </application>
 </manifest>

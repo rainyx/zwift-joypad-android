@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 默认（英文）。没有匹配语言资源时使用这里。中文见 values-zh/strings.xml -->
+<resources>
+
+    <!-- 页面标题 -->
+    <string name="title_settings">Settings</string>
+    <string name="title_log">Log</string>
+    <string name="title_about">About</string>
+
+    <!-- 主界面 -->
+    <string name="menu_start">Start advertising</string>
+    <string name="menu_stop">Stop advertising</string>
+    <string name="menu_restart">Restart advertising</string>
+    <string name="menu_battery">Send battery level</string>
+    <string name="menu_log">Log</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_about">About</string>
+    <string name="hint_idle">Press and hold an empty area to see what each button does</string>
+    <string name="unassigned">Unassigned</string>
+    <string name="paddle_hint_left">◀ Steer · Brake ▶</string>
+    <string name="paddle_hint_right">◀ Brake · Steer ▶</string>
+    <string name="side_left">Left</string>
+    <string name="side_right">Right</string>
+    <string name="side_both">Both</string>
+    <string name="custom_wave">Custom waveform</string>
+
+    <!-- 设置 -->
+    <string name="settings_header">Controller settings</string>
+    <string name="settings_header_desc">Choose which Zwift device to emulate and the ZP key code each button sends.</string>
+    <string name="restart_prompt">Device emulation settings changed. They take effect after advertising restarts. Restart now?</string>
+    <string name="restart_adv">Restart</string>
+    <string name="later">Later</string>
+    <string name="card_device">Device emulation (Controller)</string>
+    <string name="preset">Preset</string>
+    <string name="preset_desc">Ride uses 0x23 in plain text; Play/Click use an encrypted handshake</string>
+    <string name="adv_type">Advertising type (hex)</string>
+    <string name="adv_type_desc">Manufacturer data 4A 09 &lt;type&gt;; 02/03/06/09 enable encryption</string>
+    <string name="product_id">Product ID</string>
+    <string name="product_id_desc">Selects the bindings Zwift loads: 8 Ride · 11 Click · 14 Play</string>
+    <string name="device_name">Device name</string>
+    <string name="device_name_desc">Advertised name (the phone\'s Bluetooth name is set to it before advertising) + DevInfo name</string>
+    <string name="encryption">Encryption</string>
+    <string name="report_msg">Report message</string>
+    <string name="report_msg_desc">Opcode used for button notifications</string>
+    <string name="card_buttons">Buttons</string>
+    <string name="card_dpad">D-Pad</string>
+    <string name="card_shoulder">Shoulder buttons</string>
+    <string name="paddle_range">Paddle full range</string>
+    <string name="paddle_range_desc">Calibration min/max written to input config DO 0x0400 (10–100)</string>
+    <string name="zl_paddle">ZL paddle</string>
+    <string name="zr_paddle">ZR paddle</string>
+    <string name="zl_paddle_desc">Tilt left to steer / right to brake (default LH)</string>
+    <string name="zr_paddle_desc">Tilt right to steer / left to brake (default RH)</string>
+    <string name="invert">Invert</string>
+    <string name="card_look">Appearance</string>
+    <string name="bg_theme">Main screen background</string>
+    <string name="bg_theme_desc">Zwift orange / dark / light</string>
+    <string name="key_style">Button style</string>
+    <string name="key_style_desc">Realistic: full controller body. Simple: buttons only, enlarged for easier touch (ZL/ZR unchanged)</string>
+    <string name="language">语言 / Language</string>
+    <string name="language_desc">Follow system uses the phone\'s language, or English if it isn\'t supported</string>
+    <string name="card_feedback">Feedback &amp; behavior</string>
+    <string name="vibrate">Vibration</string>
+    <string name="vibrate_desc">Vibrate when Zwift sends a 0x12 haptic request</string>
+    <string name="event_toast">Event toasts</string>
+    <string name="event_toast_desc">Show Zwift events (collision, Ride On…) at the top of the main screen</string>
+    <string name="auto_start">Advertise on launch</string>
+    <string name="auto_start_desc">Start BLE advertising when the app opens</string>
+    <string name="hold_guide">Hold to show guide</string>
+    <string name="hold_guide_desc">Press and hold an empty area of the main screen to show button hints; release to hide them</string>
+    <string name="reset_defaults">Restore defaults</string>
+    <string name="reset_confirm">Restore all settings to their defaults?</string>
+    <string name="reset_ok">Restore</string>
+    <string name="reset_done">Defaults restored</string>
+    <string name="cancel">Cancel</string>
+    <string name="bad_number">Invalid advertising type or product ID; not saved</string>
+
+    <string-array name="lang_options">
+        <item>Follow system</item>
+        <item>English</item>
+        <item>中文</item>
+    </string-array>
+    <string-array name="bg_themes">
+        <item>Zwift orange</item>
+        <item>Dark</item>
+        <item>Light</item>
+    </string-array>
+    <string-array name="key_styles">
+        <item>Realistic</item>
+        <item>Simple</item>
+    </string-array>
+    <string-array name="presets">
+        <item>Zwift Ride (plain)</item>
+        <item>Zwift Play (encrypted)</item>
+        <item>Zwift Click (encrypted)</item>
+        <item>Custom</item>
+    </string-array>
+    <string-array name="digital_labels">
+        <item>Up ∧</item>
+        <item>Left &lt;</item>
+        <item>Down ∨</item>
+        <item>Right &gt;</item>
+        <item>Y</item>
+        <item>A</item>
+        <item>B</item>
+        <item>Z</item>
+        <item>LS</item>
+        <item>RS</item>
+    </string-array>
+    <!-- 键码 0x00..0x0F 在 Zwift 默认绑定中的动作 -->
+    <string-array name="keycode_actions">
+        <item>Turn left at junction</item>
+        <item>Action bar</item>
+        <item>Turn right at junction</item>
+        <item>U-turn (hold)</item>
+        <item>Select</item>
+        <item>Back / menu</item>
+        <item>Use power-up</item>
+        <item>Ride On (hold: bomb)</item>
+        <item>Shift down / lower intensity</item>
+        <item>Shift down</item>
+        <item>Drops binding</item>
+        <item>Left power button</item>
+        <item>Shift up / raise intensity</item>
+        <item>Shift up</item>
+        <item>Drops binding</item>
+        <item>Right power button</item>
+    </string-array>
+    <string name="key_none">Don\'t send</string>
+    <string-array name="analog_names">
+        <item>LH left horizontal (0x10)</item>
+        <item>RH right horizontal (0x11)</item>
+        <item>LV left vertical (0x12)</item>
+        <item>RV right vertical (0x13)</item>
+        <item>Don\'t send</item>
+    </string-array>
+
+    <!-- 日志 -->
+    <string name="copy">Copy</string>
+    <string name="copied">Copied</string>
+    <string name="clear">Clear</string>
+
+    <!-- 关于 -->
+    <string name="version_fmt">Version %1$s</string>
+    <string name="author">Author</string>
+    <string name="features">Features</string>
+    <string name="disclaimer">Disclaimer</string>
+    <string-array name="feature_list">
+        <item>Turns your phone into a Zwift controller that connects to Zwift over Bluetooth, with no extra hardware or PC software</item>
+        <item>Full button set: D-pad, Y / Z / A / B, −/＋ shifting, ZL / ZR paddles for steering and braking, multi-touch</item>
+        <item>Receives in-game events from Zwift (collisions, Ride On, power-ups…), shows them at the top and vibrates</item>
+        <item>Two button styles (Realistic / Simple) and three backgrounds (Zwift orange / dark / light)</item>
+        <item>Press and hold an empty area to see the Zwift action of each button</item>
+        <item>Custom key code for every button; channel, invert and range for each paddle</item>
+        <item>Protocol log for troubleshooting connections</item>
+    </string-array>
+    <string-array name="disclaimer_list">
+        <item>This software is for learning and technical research only. Do not use it for any commercial purpose.</item>
+        <item>This is a personal open-source project. It is not affiliated with, authorized or endorsed by Zwift, Inc. Zwift and related product names and trademarks belong to their respective owners.</item>
+        <item>You use this software at your own risk. The author is not responsible for any consequences, including but not limited to problems with accounts, devices or data.</item>
+        <item>This software is provided \"as is\", without warranty of any kind, express or implied.</item>
+    </string-array>
+
+    <!-- 连接状态 -->
+    <string name="state_not_started">Not started</string>
+    <string name="state_stopped">Stopped</string>
+    <string name="state_gatt_ready">GATT service created</string>
+    <string name="state_advertising">Advertising, waiting for Zwift…</string>
+    <string name="state_adv_failed">Advertising failed, code=%1$d</string>
+    <string name="state_connected">Connected to Zwift</string>
+    <string name="state_handshake_done">Handshake done, waiting for Zwift to read device info</string>
+    <string name="state_reading_info">Zwift is reading device info…</string>
+    <string name="state_ready">Connected to Zwift, ready to ride</string>
+
+    <!-- 协议日志 -->
+    <string name="log_bt_off">Bluetooth is off</string>
+    <string name="log_no_adv">This device does not support BLE peripheral advertising</string>
+    <string name="log_rename">Phone Bluetooth name %1$s → %2$s</string>
+    <string name="log_rename_timeout">Warning: Bluetooth name did not change to %1$s within 3 s (currently %2$s); advertising anyway</string>
+    <string name="log_adv_paused">Connected; advertising paused</string>
+    <string name="log_adv">Advertising: %1$s, ZP service data[02], FC82, manufacturer data 4A 09 %2$s%3$s</string>
+    <string name="log_mode_enc">" (encrypted)"</string>
+    <string name="log_mode_plain">" (plain)"</string>
+    <string name="log_link_up">Link connected: %1$s (this app or another BLE app on this phone)</string>
+    <string name="log_link_down">Link disconnected: %1$s%2$s</string>
+    <string name="log_session_end">" (ZP session ended)"</string>
+    <string name="log_write">Write %1$s: %2$s</string>
+    <string name="log_subscribe">Subscribe %1$s = %2$s</string>
+    <string name="log_frame_long">Warning: frame length %1$d > MTU-3 (%2$d), will be truncated</string>
+    <string name="log_encrypt_fail">Encryption failed: %1$s</string>
+    <string name="log_decrypt_fail">Decryption failed: %1$s raw=%2$s</string>
+    <string name="log_trainer_cmd">"  ⚠ Zwift sent a trainer control command on this link (opcode %1$s): it treats the link as a ZP trainer, usually because a device from another app on this phone is selected in Zwift"</string>
+    <string name="log_bad_rideon">Invalid RideOn: %1$s</string>
+    <string name="log_rideon">RX RideOn handshake (%1$s), Zwift protocol version %2$s%3$s</string>
+    <string name="log_rideon_key">", with %1$dB public key"</string>
+    <string name="log_no_pubkey">Encrypted mode but Zwift sent no public key (is this advertising type plain on Zwift\'s side?)</string>
+    <string name="log_kdf_fail">ECDH/HKDF failed: %1$s</string>
+    <string name="log_key_ready">AES-256-CCM session key derived</string>
+    <string name="log_tx_rideon">TX RideOn reply %1$s%2$s</string>
+    <string name="log_get">GET DO 0x%1$04X → reply %2$dB</string>
+    <string name="log_ctrl_req">"  ControllerRequest (non-haptic): %1$s"</string>
+    <string name="log_haptic_f2">"  HapticRequest.f2 = %1$s (likely stop/mode)"</string>
+    <string name="log_haptic_event">"  ★ Haptic event: %1$s%2$s%3$s%4$s"</string>
+    <string name="log_loop">" loop "</string>
+
+    <!-- Zwift 震动事件 -->
+    <string name="haptic_collision">Collision</string>
+    <string name="haptic_road_extent">Road edge</string>
+    <string name="haptic_return_rideon">Ride On returned</string>
+    <string name="haptic_bomb_rideon">Ride On bomb</string>
+    <string name="haptic_shift_extent">Shift limit</string>
+    <string name="haptic_connected">Connected</string>
+    <string name="haptic_speed_boost">Speed boost</string>
+    <string name="haptic_use_powerup">Power-up used</string>
+    <string name="haptic_snow_dirt">Snow / dirt</string>
+    <string name="haptic_hazard">Road hazard</string>
+    <string name="haptic_unknown">Unknown event</string>
+</resources>

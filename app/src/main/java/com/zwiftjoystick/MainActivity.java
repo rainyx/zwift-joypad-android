@@ -2,7 +2,6 @@ package com.zwiftjoystick;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -30,7 +29,7 @@ import com.zwiftjoystick.ui.PadButton;
 import com.zwiftjoystick.ui.PaddleView;
 
 /** 横屏深色手柄主界面：左 D-pad + ZL/LS，右 YABZ + ZR/RS；其它功能在 ☰ 菜单。 */
-public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
+public class MainActivity extends BaseActivity implements ZwiftPeripheral.Listener {
 
     static final int BG = Color.rgb(18, 20, 24);
     static final int ORANGE = Color.rgb(252, 103, 25);
@@ -227,7 +226,7 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         eventView.animate().cancel();
         eventView.setAlpha(1f);
         eventView.setTextColor(fgDim);
-        eventView.setText("长按空白处查看按键说明");
+        eventView.setText(R.string.hint_idle);
         eventView.removeCallbacks(clearEvent);
         eventView.postDelayed(clearEvent, 2000);
     }
@@ -253,8 +252,7 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         dpad.setOnDir((dir, down) -> app.peripheral.setButton(p.digital[p.digitalIndex(dirs[dir])], down));
         for (int d = 0; d < 4; d++) {
             float[] a = DpadView.anchor(d);
-            int key = p.digital[p.digitalIndex(dirs[d])];
-            hints.add(dpad, a[0], a[1], key < 16 ? actionText(key) : "未分配", CYAN);
+            hint(dpad, a[0], a[1], dirs[d], p.digital[p.digitalIndex(dirs[d])], CYAN);
         }
         leftBody.addView(dpad);
         leftBody.addView(chin("LS", "-"));
@@ -297,8 +295,7 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         int idx = p.digitalIndex(control);
         PadButton b = new PadButton(this, control, color).setStyle(PadButton.STYLE_BALL);
         b.setOnPress(down -> app.peripheral.setButton(p.digital[idx], down));
-        int key = p.digital[idx];
-        hints.add(b, key < 16 ? actionText(key) : "未分配", color);
+        hint(b, 0.5f, 0.5f, control, p.digital[idx], color);
         return b;
     }
 
@@ -309,8 +306,7 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         PadButton b = new PadButton(this, sign, CYAN).setStyle(PadButton.STYLE_CHIN).setGlow(CYAN)
                 .setPlate(simple());
         b.setOnPress(down -> app.peripheral.setButton(p.digital[idx], down));
-        int key = p.digital[idx];
-        hints.add(b, key < 16 ? actionText(key) : "未分配", CYAN);
+        hint(b, 0.5f, 0.5f, control, p.digital[idx], CYAN);
         return b;
     }
 
@@ -332,15 +328,14 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
             boolean inv = left ? p.zlInvert : p.zrInvert;
             app.peripheral.setAnalog(loc, inv ? -val : val);
         });
-        hints.add(v, left ? "◀ 左倾转向 · 右倾刹车 ▶" : "◀ 左倾刹车 · 右倾转向 ▶", CYAN);
+        hints.add(v, control, getString(left ? R.string.paddle_hint_left : R.string.paddle_hint_right), CYAN);
         return v;
     }
 
-    /** Prefs.KEYCODE_NAMES 中 "·" 之后的动作描述。 */
-    private static String actionText(int key) {
-        String s = Prefs.KEYCODE_NAMES[key];
-        int i = s.indexOf('·');
-        return i < 0 ? s : s.substring(i + 2);
+    /** 说明层标签：上行为设置里的键码名（如 LS1、FACE_Y；未分配时用屏幕控件名），下行为 Zwift 动作。 */
+    private void hint(View target, float fx, float fy, String control, int key, int color) {
+        String name = Prefs.keyName(key);
+        hints.add(target, fx, fy, name != null ? name : control, Prefs.actionText(getResources(), key), color);
     }
 
     private View space(int w) {
@@ -352,11 +347,12 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
     private void showMenu(View anchor) {
         PopupMenu pm = new PopupMenu(this, anchor);
         Menu m = pm.getMenu();
-        m.add(0, 1, 0, app.isRunning() ? "停止广播" : "开始广播");
-        m.add(0, 2, 1, "重新开始广播");
-        m.add(0, 3, 2, "发送电量");
-        m.add(0, 4, 3, "日志");
-        m.add(0, 5, 4, "设置");
+        m.add(0, 1, 0, app.isRunning() ? R.string.menu_stop : R.string.menu_start);
+        m.add(0, 2, 1, R.string.menu_restart);
+        m.add(0, 3, 2, R.string.menu_battery);
+        m.add(0, 4, 3, R.string.menu_log);
+        m.add(0, 5, 4, R.string.menu_settings);
+        m.add(0, 6, 5, R.string.menu_about);
         pm.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case 1:
@@ -374,6 +370,9 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
                     return true;
                 case 5:
                     startActivity(new Intent(this, SettingsActivity.class));
+                    return true;
+                case 6:
+                    startActivity(new Intent(this, AboutActivity.class));
                     return true;
                 default:
                     return false;
@@ -404,8 +403,8 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
     @Override
     public void onHaptic(int side, boolean loop, int waveId, byte[] custom) {
         if (app.prefs.eventToast) {
-            String sideS = side == 0 ? "左" : side == 1 ? "右" : "双侧";
-            String ev = waveId >= 0 ? ZwiftPeripheral.hapticName(waveId) : "自定义波形";
+            String sideS = getString(side == 0 ? R.string.side_left : side == 1 ? R.string.side_right : R.string.side_both);
+            String ev = waveId >= 0 ? ZwiftPeripheral.hapticName(waveId) : getString(R.string.custom_wave);
             eventView.animate().cancel();
             eventView.setAlpha(1f);
             eventView.setTextColor(fg);

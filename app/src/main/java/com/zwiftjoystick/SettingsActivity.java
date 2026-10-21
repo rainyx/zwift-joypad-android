@@ -1,6 +1,5 @@
 package com.zwiftjoystick;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -26,7 +25,7 @@ import android.widget.Toast;
  * 设置页：设备模拟 / Buttons / D-Pad / Shoulder / 外观 / 反馈 分卡片，
  * 每个屏幕按键选择发送的手柄键码，Zwift 再按自身的按键绑定映射成游戏动作。
  */
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends BaseActivity {
 
     private static final int CARD = Color.rgb(30, 34, 40);
     private static final int TEXT2 = Color.rgb(160, 168, 180);
@@ -40,7 +39,7 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle("设置");
+        setTitle(R.string.title_settings);
         p = App.get().prefs;
         setContentView(build());
     }
@@ -58,12 +57,12 @@ public class SettingsActivity extends Activity {
         p.save();
         if (deviceChanged && App.get().isRunning()) {
             new AlertDialog.Builder(this)
-                    .setMessage("设备模拟参数已修改，需要重新开始广播才生效。现在重启广播吗？")
-                    .setPositiveButton("重启广播", (d, w) -> {
+                    .setMessage(R.string.restart_prompt)
+                    .setPositiveButton(R.string.restart_adv, (d, w) -> {
                         App.get().startAdvertising();
                         finish();
                     })
-                    .setNegativeButton("稍后", (d, w) -> finish())
+                    .setNegativeButton(R.string.later, (d, w) -> finish())
                     .show();
         } else {
             super.onBackPressed();
@@ -78,24 +77,24 @@ public class SettingsActivity extends Activity {
         col.setPadding(dp(16), dp(12), dp(16), dp(24));
         scroll.addView(col);
 
-        col.addView(header("手柄设置", "选择要模拟的 Zwift 设备，并配置每个按键发送的 ZP 键码。"));
+        col.addView(header(getString(R.string.settings_header), getString(R.string.settings_header_desc)));
 
         // ---------- 设备模拟 ----------
-        LinearLayout dev = card(col, "设备模拟（Controller）");
-        Spinner preset = spinner(Prefs.PRESETS, p.preset);
-        row(dev, "预设", "Ride 用 0x23 明文；Play/Click 走加密握手", preset);
+        LinearLayout dev = card(col, getString(R.string.card_device));
+        Spinner preset = spinner(getResources().getStringArray(R.array.presets), p.preset);
+        row(dev, getString(R.string.preset), getString(R.string.preset_desc), preset);
         advTypeEdit = edit(String.format("%02X", p.advType), InputType.TYPE_CLASS_TEXT);
-        row(dev, "广播类型 (hex)", "厂商数据 4A 09 <类型>；02/03/06/09 触发加密", advTypeEdit);
+        row(dev, getString(R.string.adv_type), getString(R.string.adv_type_desc), advTypeEdit);
         productEdit = edit(String.valueOf(p.productId), InputType.TYPE_CLASS_NUMBER);
-        row(dev, "产品 ID", "决定 Zwift 加载的绑定：8 Ride · 11 Click · 14 Play", productEdit);
+        row(dev, getString(R.string.product_id), getString(R.string.product_id_desc), productEdit);
         nameEdit = edit(p.name, InputType.TYPE_CLASS_TEXT);
-        row(dev, "设备名称", "广播名（每次广播前把手机蓝牙名改成它）+ DevInfo 名称", nameEdit);
+        row(dev, getString(R.string.device_name), getString(R.string.device_name_desc), nameEdit);
 
         encryptSwitch = new Switch(this);
         encryptSwitch.setChecked(p.encrypted);
-        row(dev, "加密", "P-256 ECDH + AES-256-CCM", encryptSwitch);
+        row(dev, getString(R.string.encryption), "P-256 ECDH + AES-256-CCM", encryptSwitch);
         formatSpinner = spinner(Prefs.FORMATS, p.format);
-        row(dev, "上报消息", "按键通知使用的 opcode", formatSpinner);
+        row(dev, getString(R.string.report_msg), getString(R.string.report_msg_desc), formatSpinner);
         setDeviceEditable(p.preset == 3);
         preset.setOnItemSelectedListener(new SimpleSelect(pos -> {
             if (pos == p.preset) return;
@@ -110,15 +109,15 @@ public class SettingsActivity extends Activity {
         }));
 
         // ---------- Buttons ----------
-        LinearLayout btns = card(col, "按键（Buttons）");
+        LinearLayout btns = card(col, getString(R.string.card_buttons));
         for (String c : new String[]{"Y", "A", "B", "Z"}) digitalRow(btns, c);
 
         // ---------- D-Pad ----------
-        LinearLayout dpad = card(col, "方向键（D-Pad）");
+        LinearLayout dpad = card(col, getString(R.string.card_dpad));
         for (String c : new String[]{"UP", "LEFT", "DOWN", "RIGHT"}) digitalRow(dpad, c);
 
         // ---------- Shoulder ----------
-        LinearLayout sh = card(col, "肩键（Shoulder Buttons）");
+        LinearLayout sh = card(col, getString(R.string.card_shoulder));
         digitalRow(sh, "LS");
         digitalRow(sh, "RS");
         analogRow(sh, true);
@@ -138,55 +137,64 @@ public class SettingsActivity extends Activity {
         }));
         rangeBox.addView(fine, new LinearLayout.LayoutParams(dp(200), -2));
         rangeBox.addView(range);
-        row(sh, "拨片满量程", "写入输入配置 DO 0x0400 的校准 min/max（10–100）", rangeBox);
+        row(sh, getString(R.string.paddle_range), getString(R.string.paddle_range_desc), rangeBox);
 
         // ---------- 反馈 ----------
-        LinearLayout look = card(col, "外观");
-        Spinner bgSpinner = spinner(Prefs.BG_THEMES, p.bgTheme);
+        LinearLayout look = card(col, getString(R.string.card_look));
+        Spinner langSpinner = spinner(getResources().getStringArray(R.array.lang_options), p.lang);
+        langSpinner.setOnItemSelectedListener(new SimpleSelect(pos -> {
+            if (pos == p.lang) return;
+            p.lang = pos;
+            p.save();
+            App.get().languageChanged();
+            recreate();
+        }));
+        row(look, getString(R.string.language), getString(R.string.language_desc), langSpinner);
+        Spinner bgSpinner = spinner(getResources().getStringArray(R.array.bg_themes), p.bgTheme);
         bgSpinner.setOnItemSelectedListener(new SimpleSelect(pos -> p.bgTheme = pos));
-        row(look, "主界面背景", "Zwift 橙 / 深色 / 浅色（会记住选择）", bgSpinner);
-        Spinner keySpinner = spinner(Prefs.KEY_STYLES, p.keyStyle);
+        row(look, getString(R.string.bg_theme), getString(R.string.bg_theme_desc), bgSpinner);
+        Spinner keySpinner = spinner(getResources().getStringArray(R.array.key_styles), p.keyStyle);
         keySpinner.setOnItemSelectedListener(new SimpleSelect(pos -> p.keyStyle = pos));
-        row(look, "按键外观", "仿真：还原手柄机身；简约：只保留按键并放大，方便触摸（不影响 ZL/ZR）", keySpinner);
+        row(look, getString(R.string.key_style), getString(R.string.key_style_desc), keySpinner);
 
-        LinearLayout fb = card(col, "反馈与行为");
-        row(fb, "手机震动", "收到 Zwift 0x12 震动请求时振动", toggle(p.vibrate, v -> p.vibrate = v));
-        row(fb, "事件提示", "主界面顶部显示 Zwift 事件（碰撞、RideOn…）", toggle(p.eventToast, v -> p.eventToast = v));
-        row(fb, "启动时自动广播", "打开 App 即开始 BLE 广播", toggle(p.autoStart, v -> p.autoStart = v));
-        row(fb, "长按显示Guide", "长按主界面空白处显示按键说明，松开隐藏", toggle(p.holdGuide, v -> p.holdGuide = v));
+        LinearLayout fb = card(col, getString(R.string.card_feedback));
+        row(fb, getString(R.string.vibrate), getString(R.string.vibrate_desc), toggle(p.vibrate, v -> p.vibrate = v));
+        row(fb, getString(R.string.event_toast), getString(R.string.event_toast_desc), toggle(p.eventToast, v -> p.eventToast = v));
+        row(fb, getString(R.string.auto_start), getString(R.string.auto_start_desc), toggle(p.autoStart, v -> p.autoStart = v));
+        row(fb, getString(R.string.hold_guide), getString(R.string.hold_guide_desc), toggle(p.holdGuide, v -> p.holdGuide = v));
 
         Button reset = new Button(this);
-        reset.setText("恢复默认设置");
+        reset.setText(R.string.reset_defaults);
         reset.setOnClickListener(v -> new AlertDialog.Builder(this)
-                .setMessage("恢复所有设置为默认值？")
-                .setPositiveButton("恢复", (d, w) -> {
+                .setMessage(R.string.reset_confirm)
+                .setPositiveButton(R.string.reset_ok, (d, w) -> {
                     p.reset();
                     deviceChanged = true;
                     setContentView(build());
-                    Toast.makeText(this, "已恢复默认", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.reset_done, Toast.LENGTH_SHORT).show();
                 })
-                .setNegativeButton("取消", null).show());
+                .setNegativeButton(R.string.cancel, null).show());
         col.addView(reset);
         return scroll;
     }
 
     private void digitalRow(LinearLayout card, String control) {
         int idx = p.digitalIndex(control);
-        Spinner s = spinner(Prefs.KEYCODE_NAMES, p.digital[idx]);
+        Spinner s = spinner(Prefs.keycodeNames(getResources()), p.digital[idx]);
         s.setOnItemSelectedListener(new SimpleSelect(pos -> p.digital[idx] = pos));
-        row(card, Prefs.DIGITAL_LABEL[idx], null, s);
+        row(card, getResources().getStringArray(R.array.digital_labels)[idx], null, s);
     }
 
     private void analogRow(LinearLayout card, boolean left) {
         LinearLayout box = new LinearLayout(this);
         box.setGravity(Gravity.CENTER_VERTICAL);
-        Spinner s = spinner(Prefs.ANALOG_NAMES, left ? p.zlLoc : p.zrLoc);
+        Spinner s = spinner(getResources().getStringArray(R.array.analog_names), left ? p.zlLoc : p.zrLoc);
         s.setOnItemSelectedListener(new SimpleSelect(pos -> {
             if (left) p.zlLoc = pos;
             else p.zrLoc = pos;
         }));
         CheckBox inv = new CheckBox(this);
-        inv.setText("反向");
+        inv.setText(R.string.invert);
         inv.setTextColor(Color.WHITE);
         inv.setChecked(left ? p.zlInvert : p.zrInvert);
         inv.setOnCheckedChangeListener((b, c) -> {
@@ -195,8 +203,8 @@ public class SettingsActivity extends Activity {
         });
         box.addView(s);
         box.addView(inv);
-        row(card, left ? "ZL 拨片" : "ZR 拨片",
-                left ? "左倾 转向 / 右倾 刹车（默认 LH）" : "右倾 转向 / 左倾 刹车（默认 RH）", box);
+        row(card, getString(left ? R.string.zl_paddle : R.string.zr_paddle),
+                getString(left ? R.string.zl_paddle_desc : R.string.zr_paddle_desc), box);
     }
 
     private void readDeviceFields() {
@@ -215,7 +223,7 @@ public class SettingsActivity extends Activity {
             p.encrypted = enc;
             p.format = f;
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "广播类型 / 产品 ID 格式错误，未保存", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.bad_number, Toast.LENGTH_SHORT).show();
         }
     }
 

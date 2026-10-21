@@ -48,7 +48,7 @@ public class ControllerBody extends ViewGroup {
     /** 简约模式：不画机身，只摆放按键（凹槽控件放大，下巴键移到内侧） */
     private boolean minimal;
     private boolean chinRight;
-    private final RectF wellRect = new RectF(), chinRect = new RectF();
+    private final RectF wellRect = new RectF(), chinRect = new RectF(), ledRect = new RectF();
 
     public ControllerBody(Context ctx, int ledColor) {
         super(ctx);
@@ -77,7 +77,7 @@ public class ControllerBody extends ViewGroup {
     public void setLedState(int state) {
         if (ledState == state) return;
         ledState = state;
-        if (state == LED_ADVERTISING && !minimal) startBreath();
+        if (state == LED_ADVERTISING) startBreath();
         else stopBreath();
         invalidate();
     }
@@ -120,11 +120,16 @@ public class ControllerBody extends ViewGroup {
             float chinL = chinRight ? left + D + gap : left;
             wellRect.set(wellL, top, wellL + D, top + D);
             chinRect.set(chinL, h / 2f - ch / 2f, chinL + cw, h / 2f + ch / 2f);
+            // LED 居中放在下巴键上方
+            float lw = Math.min(S * 0.075f, cw * 0.5f), lh = lw * 0.29f, ly = chinRect.top - D * 0.08f;
+            ledRect.set(chinRect.centerX() - lw / 2, ly - lh / 2, chinRect.centerX() + lw / 2, ly + lh / 2);
         } else {
             float rr = recessR(), wy = cy - S * 0.03f;
             wellRect.set(cx - rr, wy - rr, cx + rr, wy + rr);
             float cw = S * 0.32f, ch = S * 0.22f, top = cy + S * 0.27f;
             chinRect.set(cx - cw / 2, top, cx + cw / 2, top + ch);
+            float lw = S * 0.075f, lh = S * 0.022f, ly = cy - S * 0.345f;
+            ledRect.set(cx - lw / 2, ly - lh / 2, cx + lw / 2, ly + lh / 2);
         }
     }
 
@@ -196,7 +201,12 @@ public class ControllerBody extends ViewGroup {
 
     @Override
     protected void onDraw(Canvas c) {
-        if (S <= 0 || minimal) return;
+        if (S <= 0) return;
+        if (minimal) {
+            // 简约模式不画机身，只保留 LED
+            drawLed(c);
+            return;
+        }
         // 落在橙色背景上的柔和投影
         shadow.setColor(Color.argb(1, 0, 0, 0));
         shadow.setShadowLayer(S * 0.09f, 0, S * 0.05f, shadowColor);
@@ -222,9 +232,12 @@ public class ControllerBody extends ViewGroup {
                 Color.argb(40, 255, 255, 255), Shader.TileMode.CLAMP));
         c.drawPath(recess, rim);
 
-        // LED
-        float lw = S * 0.075f, lh = S * 0.022f, ly = cy - S * 0.345f;
-        tmp.set(cx - lw / 2, ly - lh / 2, cx + lw / 2, ly + lh / 2);
+        drawLed(c);
+    }
+
+    /** LED：关闭灰 / 广播中黄灰呼吸 / 已连接青蓝常亮 */
+    private void drawLed(Canvas c) {
+        float lh = ledRect.height();
         switch (ledState) {
             case LED_CONNECTED:
                 led.setColor(ledColor);
@@ -242,6 +255,6 @@ public class ControllerBody extends ViewGroup {
                 led.clearShadowLayer();
                 break;
         }
-        c.drawRoundRect(tmp, lh / 2, lh / 2, led);
+        c.drawRoundRect(ledRect, lh / 2, lh / 2, led);
     }
 }

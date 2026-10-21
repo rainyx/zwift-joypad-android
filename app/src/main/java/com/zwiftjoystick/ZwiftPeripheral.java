@@ -119,6 +119,11 @@ final class ZwiftPeripheral {
 
     private BluetoothGattServer server;
     private BluetoothLeAdvertiser advertiser;
+    /**
+     * 是否正在广播。连接期间暂停广播：手机蓝牙只有一个射频，持续的高频广播会和连接事件抢时间，
+     * 数据密集时（连续换挡）容易让链路超时断开。断开后立即恢复广播，便于 Zwift 重连。
+     */
+    private boolean advertising;
     private BluetoothAdapter adapter;
     private int nameWaitTicks;
     private BluetoothGattCharacteristic chAsync, chSyncRx, chSyncTx, chBattery;
@@ -146,18 +151,18 @@ final class ZwiftPeripheral {
         BluetoothManager bm = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter adapter = bm.getAdapter();
         if (adapter == null || !adapter.isEnabled()) {
-            log("蓝牙未开启");
+            log(App.str(R.string.log_bt_off));
             return;
         }
         advertiser = adapter.getBluetoothLeAdvertiser();
         if (advertiser == null) {
-            log("此设备不支持 BLE 外设广播");
+            log(App.str(R.string.log_no_adv));
             return;
         }
         // 扫描响应里的名称取自全机蓝牙名，别的 App（如骑行台模拟器）可能改过它，每次广播前都改回来
         this.adapter = adapter;
         if (cfg.name != null && !cfg.name.isEmpty() && !cfg.name.equals(adapter.getName())) {
-            log("手机蓝牙名 " + adapter.getName() + " → " + cfg.name);
+            log(App.str(R.string.log_rename, adapter.getName(), cfg.name));
             adapter.setName(cfg.name);
         }
 
@@ -174,11 +179,12 @@ final class ZwiftPeripheral {
         svc.addCharacteristic(chSyncTx);
         svc.addCharacteristic(ch6);
         server.addService(svc); // 电池服务在 onServiceAdded 里再加
-        state("GATT 服务已创建");
+        state(R.string.state_gatt_ready);
     }
 
     void stop() {
         main.removeCallbacks(keepAlive);
+        advertising = false;
         if (advertiser != null) {
             try {
                 advertiser.stopAdvertising(advCallback);
@@ -209,7 +215,7 @@ final class ZwiftPeripheral {
                 main.postDelayed(this::startAdvertising, 100);
                 return;
             }
-            log("警告: 3 秒内蓝牙名未变为 " + cfg.name + "（当前 " + adapter.getName() + "），仍开始广播");
+            log(App.str(R.string.log_rename_timeout, cfg.name, adapter.getName()));
         }
         nameWaitTicks = 0;
         byte[] mfr = new byte[1 + cfg.advExtra.length];
@@ -233,19 +239,21 @@ final class ZwiftPeripheral {
                 .addServiceUuid(new ParcelUuid(ADV_SVC))
                 .setIncludeDeviceName(true)
                 .build();
+        if (advertising) advertiser.stopAdvertising(advCallback);
         advertiser.startAdvertising(settings, data, scan, advCallback);
-        log("广播: " + adapter.getName() + ", ZP 服务数据[02], FC82, 厂商数据 4A 09 " + Hex.of(mfr) + (cfg.encrypted ? "（加密模式）" : "（明文）"));
+        advertising = true;
+        log(App.str(R.string.log_adv, adapter.getName(), Hex.of(mfr), App.str(cfg.encrypted ? R.string.log_mode_enc : R.string.log_mode_plain)));
     }
 
     private final AdvertiseCallback advCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            state("广播中，等待 Zwift 连接…");
+            state(R.string.state_advertising);
         }
 
         @Override
         public void onStartFailure(int errorCode) {
-            state("广播失败 code=" + errorCode);
+            state(R.string.state_adv_failed, errorCode);
         }
     };
 
@@ -279,14 +287,18 @@ final class ZwiftPeripheral {
             main.post(() -> {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     session(device);
-                    log("链路连接: " + device.getAddress() + "（可能是本 App，也可能是同机其它 BLE App 的连接）");
+                    log(App.str(R.string.log_link_up, device.getAddress()));
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     Session s = sessions.remove(device.getAddress());
-                    log("链路断开: " + device.getAddress() + (s != null && s.handshake ? "（ZP 会话结束）" : ""));
+                    log(App.str(R.string.log_link_down, device.getAddress(), s != null && s.handshake ? App.str(R.string.log_session_end) : ""));
                     txQueue.removeIf(item -> item[0] == s);
                     txBusy = false;
                     pumpTx();
-                    state(isConnected() ? "已连接 Zwift" : "广播中，等待 Zwift 连接…");
+                    if (isConnected()) {
+                        state(R.string.state_connected);
+                    } else if (server != null && !advertising) {
+                        startAdvertising();
+                    }
                 }
             });
         }
@@ -313,7 +325,7 @@ final class ZwiftPeripheral {
             final UUID u = c.getUuid();
             main.post(() -> {
                 if (CH_SYNC_RX.equals(u)) onSyncRx(session(device), v);
-                else log("写 " + u.toString().substring(0, 8) + ": " + Hex.of(v));
+                else log(App.str(R.string.log_write, u.toString().substring(0, 8), Hex.of(v)));
             });
         }
 
@@ -330,7 +342,7 @@ final class ZwiftPeripheral {
             final boolean indicate = value != null && value.length > 0 && (value[0] & 2) != 0;
             main.post(() -> {
                 if (CH_SYNC_TX.equals(ch)) session(device).syncTxIndicate = indicate;
-                log("订阅 " + ch.toString().substring(0, 8) + " = " + (value == null ? "null" : Hex.of(value)));
+                log(App.str(R.string.log_subscribe, ch.toString().substring(0, 8), value == null ? "null" : Hex.of(value)));
             });
         }
 
@@ -347,7 +359,7 @@ final class ZwiftPeripheral {
 
     private void sendRaw(Session s, BluetoothGattCharacteristic c, byte[] data) {
         if (server == null) return;
-        if (data.length > s.mtu - 3) log("警告: 帧长 " + data.length + " > MTU-3 (" + (s.mtu - 3) + ")，会被截断");
+        if (data.length > s.mtu - 3) log(App.str(R.string.log_frame_long, data.length, s.mtu - 3));
         txQueue.add(new Object[]{s, c, data});
         pumpTx();
     }
@@ -374,7 +386,7 @@ final class ZwiftPeripheral {
             try {
                 frame = s.crypto.encrypt(plain);
             } catch (Exception e) {
-                log("加密失败: " + e);
+                log(App.str(R.string.log_encrypt_fail, e));
                 return;
             }
         }
@@ -392,7 +404,7 @@ final class ZwiftPeripheral {
             try {
                 msg = s.crypto.decrypt(raw);
             } catch (Exception e) {
-                log("解密失败: " + e + " raw=" + Hex.of(raw));
+                log(App.str(R.string.log_decrypt_fail, e, Hex.of(raw)));
                 return;
             }
         }
@@ -416,8 +428,7 @@ final class ZwiftPeripheral {
                 break;
             case 0x04:
             case 0x3F:
-                log("  ⚠ Zwift 在这条连接上发了骑行台控制指令（opcode " + opName(op)
-                        + "）：它把这条连接当成了 ZP 骑行台，通常是因为在 Zwift 里选了同机其它 App 的设备");
+                log(App.str(R.string.log_trainer_cmd, opName(op)));
                 break;
             default:
                 break;
@@ -427,40 +438,51 @@ final class ZwiftPeripheral {
     private void onRideOn(Session s, byte[] p) {
         String head = new String(p, 0, Math.min(5, p.length), StandardCharsets.US_ASCII);
         if (!"ideOn".equals(head)) {
-            log("非法 RideOn: " + Hex.of(p));
+            log(App.str(R.string.log_bad_rideon, Hex.of(p)));
             return;
         }
         String ver = p.length >= 7 ? (p[5] & 0xFF) + "." + (p[6] & 0xFF) : "?";
-        log("RX RideOn 握手（" + s.dev.getAddress() + "），Zwift 协议版本 " + ver
-                + (p.length > 7 ? "，附带公钥 " + (p.length - 7) + "B" : ""));
+        log(App.str(R.string.log_rideon, s.dev.getAddress(), ver,
+                p.length > 7 ? App.str(R.string.log_rideon_key, p.length - 7) : ""));
 
         byte[] reply;
         if (cfg.encrypted) {
             if (p.length < 7 + 64) {
-                log("加密模式但 Zwift 没发公钥（该广播类型在 Zwift 侧是明文？）");
+                log(App.str(R.string.log_no_pubkey));
                 return;
             }
             try {
                 s.crypto = new ZpCrypto();
                 s.crypto.derive(Arrays.copyOfRange(p, 7, 7 + 64));
             } catch (Exception e) {
-                log("ECDH/HKDF 失败: " + e);
+                log(App.str(R.string.log_kdf_fail, e));
                 return;
             }
             byte[] pub = s.crypto.publicKey64();
             reply = new byte[8 + 64];
             System.arraycopy(pub, 0, reply, 8, 64);
-            log("已派生 AES-256-CCM 会话密钥");
+            log(App.str(R.string.log_key_ready));
         } else {
             reply = new byte[8];
         }
         System.arraycopy("RideOn".getBytes(StandardCharsets.US_ASCII), 0, reply, 0, 6);
         reply[6] = (byte) cfg.verMajor;
         reply[7] = (byte) cfg.verMinor;
-        log("TX RideOn 应答 " + Hex.of(reply, 0, 8) + (reply.length > 8 ? " …" : ""));
+        log(App.str(R.string.log_tx_rideon, Hex.of(reply, 0, 8), reply.length > 8 ? " …" : ""));
         sendRaw(s, chSyncTx, reply);
         s.handshake = true;
-        state("握手完成，等待 Zwift 读取设备信息");
+        state(R.string.state_handshake_done);
+        pauseAdvertising();
+    }
+
+    private void pauseAdvertising() {
+        if (!advertising || advertiser == null) return;
+        try {
+            advertiser.stopAdvertising(advCallback);
+        } catch (Exception ignored) {
+        }
+        advertising = false;
+        log(App.str(R.string.log_adv_paused));
     }
 
     private void onGet(Session s, int objectId) {
@@ -468,11 +490,11 @@ final class ZwiftPeripheral {
         switch (objectId) {
             case 0x0000:
                 data = devInfoStatus(s);
-                state("Zwift 正在读取设备信息…");
+                state(R.string.state_reading_info);
                 break;
             case 0x0400:
                 data = inputConfig();
-                state("已连接 Zwift，可以开始操作");
+                state(R.string.state_ready);
                 break;
             case 0x0303:
                 data = batteryStatus();
@@ -487,7 +509,7 @@ final class ZwiftPeripheral {
         }
         Pb.Writer w = new Pb.Writer().varint(1, objectId);
         if (data.length > 0) w.bytes(2, data);
-        log(String.format("GET DO 0x%04X → 应答 %dB", objectId, data.length));
+        log(App.str(R.string.log_get, objectId, data.length));
         sendZp(s, chSyncTx, OP_GET_RESPONSE, w.toByteArray());
     }
 
@@ -528,13 +550,13 @@ final class ZwiftPeripheral {
         Map<Integer, List<Object>> req = Pb.parse(p);
         byte[] haptic = Pb.getBytes(req, 2);
         if (haptic == null) {
-            log("  ControllerRequest(非震动): " + Pb.dump(p));
+            log(App.str(R.string.log_ctrl_req, Pb.dump(p)));
             return;
         }
         Map<Integer, List<Object>> hr = Pb.parse(haptic);
         byte[] play = Pb.getBytes(hr, 1);
         if (play == null) {
-            log("  HapticRequest.f2 = " + Pb.dump(haptic) + "（疑似停止/模式）");
+            log(App.str(R.string.log_haptic_f2, Pb.dump(haptic)));
             return;
         }
         Map<Integer, List<Object>> h = Pb.parse(play);
@@ -542,9 +564,10 @@ final class ZwiftPeripheral {
         boolean loop = Pb.getLong(h, 2, 0) != 0;
         int wave = (int) Pb.getLong(h, 3, -1);
         byte[] custom = Pb.getBytes(h, 4);
-        String sideS = side == 0 ? "左" : side == 1 ? "右" : "双侧";
-        String ev = wave >= 0 ? hapticName(wave) : "自定义波形 " + (custom == null ? "" : Hex.of(custom));
-        log("  ★ 震动事件: " + sideS + (loop ? " 循环 " : " ") + (wave >= 0 ? "wave=" + wave + " " : "") + ev);
+        String sideS = App.str(side == 0 ? R.string.side_left : side == 1 ? R.string.side_right : R.string.side_both);
+        String ev = wave >= 0 ? hapticName(wave) : App.str(R.string.custom_wave) + " " + (custom == null ? "" : Hex.of(custom));
+        log(App.str(R.string.log_haptic_event, sideS, loop ? App.str(R.string.log_loop) : " ",
+                wave >= 0 ? "wave=" + wave + " " : "", ev));
         listener.onHaptic(side, loop, wave, custom);
     }
 
@@ -649,8 +672,20 @@ final class ZwiftPeripheral {
         listener.onLog(s);
     }
 
-    private void state(String s) {
+    // 最近一次状态（资源 id + 参数），切换语言后可用新语言重新发出
+    private int stateId;
+    private Object[] stateArgs;
+
+    private void state(int id, Object... args) {
+        stateId = id;
+        stateArgs = args;
+        String s = App.str(id, args);
         main.post(() -> listener.onState(s));
+    }
+
+    /** 用当前语言重新发出最近一次状态。 */
+    void restate() {
+        if (stateId != 0) state(stateId, stateArgs);
     }
 
     static String opName(int op) {
@@ -678,18 +713,20 @@ final class ZwiftPeripheral {
     }
 
     static String hapticName(int id) {
+        int r;
         switch (id) {
-            case 25: return "COLLISION（碰撞）";
-            case 41: return "ROAD_EXTENT（压路边）";
-            case 59: return "RETURN_RIDEON（回 RideOn）";
-            case 60: return "BOMB_RIDEON（RideOn 炸弹）";
-            case 32: return "SHIFT_EXTENT（档位到头）";
-            case 72: return "CONNECTED（已连接）";
-            case 87: return "SPEED_BOOST（加速）";
-            case 89: return "USE_POWERUP（使用道具）";
-            case 71: return "HAZARD_SNOW/DIRT（雪地/泥地）";
-            case 94: return "HAZARD_GENERAL（路面危险）";
-            default: return "未知事件";
+            case 25: r = R.string.haptic_collision; break;
+            case 41: r = R.string.haptic_road_extent; break;
+            case 59: r = R.string.haptic_return_rideon; break;
+            case 60: r = R.string.haptic_bomb_rideon; break;
+            case 32: r = R.string.haptic_shift_extent; break;
+            case 72: r = R.string.haptic_connected; break;
+            case 87: r = R.string.haptic_speed_boost; break;
+            case 89: r = R.string.haptic_use_powerup; break;
+            case 71: r = R.string.haptic_snow_dirt; break;
+            case 94: r = R.string.haptic_hazard; break;
+            default: r = R.string.haptic_unknown; break;
         }
+        return App.str(r);
     }
 }

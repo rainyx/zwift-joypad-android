@@ -1,6 +1,5 @@
 package com.zwiftjoystick;
 
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.graphics.Color;
@@ -14,7 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /** 协议日志（握手、GET、按键、Zwift 下发事件）。 */
-public class LogActivity extends Activity implements ZwiftPeripheral.Listener {
+public class LogActivity extends BaseActivity implements ZwiftPeripheral.Listener {
 
     private App app;
     private TextView logView, stateView;
@@ -23,7 +22,7 @@ public class LogActivity extends Activity implements ZwiftPeripheral.Listener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle("日志");
+        setTitle(R.string.title_log);
         app = App.get();
 
         LinearLayout root = new LinearLayout(this);
@@ -36,14 +35,14 @@ public class LogActivity extends Activity implements ZwiftPeripheral.Listener {
         stateView.setTextColor(Color.rgb(200, 205, 215));
         bar.addView(stateView, new LinearLayout.LayoutParams(0, -2, 1f));
         Button copy = new Button(this);
-        copy.setText("复制");
+        copy.setText(R.string.copy);
         copy.setOnClickListener(v -> {
             ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             cm.setPrimaryClip(ClipData.newPlainText("zwift-log", app.logText()));
-            Toast.makeText(this, "已复制", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show();
         });
         Button clear = new Button(this);
-        clear.setText("清空");
+        clear.setText(R.string.clear);
         clear.setOnClickListener(v -> {
             app.clearLog();
             logView.setText("");

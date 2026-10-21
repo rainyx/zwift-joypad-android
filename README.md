@@ -16,7 +16,8 @@ Turn your Android phone into a virtual **Zwift Ride–style controller**. The ap
 - **Haptic events from Zwift**: collisions, road edge, Ride On, power-up, shift limit, hazards… The event name is shown briefly at the top of the screen and the phone vibrates (both optional).
 - **Zwift Click–inspired UI**: matte black controller bodies, a one-piece D-pad rocker, frosted Y/Z/A/B keys, textured −/＋ keys, and paddles with a raised knob. Landscape and full screen.
 - **Status LEDs**: grey when stopped, breathing yellow while advertising, solid cyan when Zwift is connected.
-- **Button hints on demand**: press and hold any empty area to fade in an overlay that labels every control with its Zwift action. Release to hide it.
+- **Button hints on demand**: press and hold any empty area to fade in an overlay that labels every control with its key name (ZL, LS1, FACE_Y…) and Zwift action. Release to hide it.
+- **English and Chinese**: follows the phone's language (English when it isn't supported) or can be set in Settings.
 - **Configurable**:
   - remap any on-screen control to any controller key code;
   - choose the analog channel for each paddle, invert it, and set its range;
@@ -123,7 +124,8 @@ app/src/main/java/com/zwiftjoystick/
 - **Zwift 震动事件**：碰撞、压到路边、RideOn、道具、档位到头、路面危险等。屏幕顶部会短暂显示事件名，手机同时震动（两项都可以关闭）。
 - **仿 Zwift Click 的界面**：黑色哑光机身、一体式十字摇板、磨砂质感的 Y/Z/A/B、带纹理的 −/＋ 键、带立体旋钮的拨片；横屏全屏显示。
 - **状态灯**：停止时灰色，广播中黄灰交替呼吸，连上 Zwift 后青蓝色常亮。
-- **按需显示按键说明**：长按任意空白处，淡入一层说明，标出每个控件对应的 Zwift 动作；松开即隐藏。
+- **按需显示按键说明**：长按任意空白处，淡入一层说明，标出每个控件的按键名（ZL、LS1、FACE_Y…）和对应的 Zwift 动作；松开即隐藏。
+- **中英双语**：默认跟随手机语言（不支持的语言使用英文），也可在设置里切换。
 - **可配置**：
   - 每个屏幕按键都可以改成任意手柄键码；
   - 每个拨片可以选择模拟通道、反向、调整满量程；

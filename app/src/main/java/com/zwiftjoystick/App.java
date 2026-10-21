@@ -1,6 +1,7 @@
 package com.zwiftjoystick;
 
 import android.app.Application;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -17,7 +18,9 @@ public class App extends Application implements ZwiftPeripheral.Listener {
     ZwiftPeripheral peripheral;
     Prefs prefs;
     private final StringBuilder log = new StringBuilder();
-    private String state = "未启动";
+    private String state;
+    private int idleStateId = R.string.state_not_started;   // 未广播时显示的状态
+    private Resources res;
     private boolean running;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final CopyOnWriteArrayList<ZwiftPeripheral.Listener> listeners = new CopyOnWriteArrayList<>();
@@ -32,6 +35,7 @@ public class App extends Application implements ZwiftPeripheral.Listener {
         super.onCreate();
         instance = this;
         prefs = new Prefs(this);
+        state = str(R.string.state_not_started);
         peripheral = new ZwiftPeripheral(this, this);
     }
 
@@ -43,7 +47,25 @@ public class App extends Application implements ZwiftPeripheral.Listener {
     void stopAdvertising() {
         peripheral.stop();
         running = false;
-        onState("已停止");
+        idleStateId = R.string.state_stopped;
+        onState(str(idleStateId));
+    }
+
+    /** 按设置里的语言取资源（供非界面代码使用，如协议日志、连接状态）。 */
+    Resources res() {
+        if (res == null) res = L10n.wrap(this, prefs.lang).getResources();
+        return res;
+    }
+
+    /** 语言设置改变后调用，下次 res() 重新加载。 */
+    void languageChanged() {
+        res = null;
+        if (running) peripheral.restate();
+        else onState(str(idleStateId));
+    }
+
+    static String str(int id, Object... args) {
+        return instance.res().getString(id, args);
     }
 
     boolean isRunning() {

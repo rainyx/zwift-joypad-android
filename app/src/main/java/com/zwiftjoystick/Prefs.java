@@ -2,43 +2,26 @@ package com.zwiftjoystick;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 
 /** 所有用户设置（SharedPreferences）。 */
 final class Prefs {
 
     // ---- 屏幕上的控件 ----
     static final String[] DIGITAL = {"UP", "LEFT", "DOWN", "RIGHT", "Y", "A", "B", "Z", "LS", "RS"};
-    static final String[] DIGITAL_LABEL = {"上 ∧", "左 <", "下 ∨", "右 >", "Y", "A", "B", "Z", "LS", "RS"};
     static final int[] DIGITAL_DEFAULT = {1, 0, 3, 2, 6, 4, 5, 7, 8, 12};
 
-    /** 手柄键码 0..15 及其在 Zwift 默认绑定中的功能。 */
-    static final String[] KEYCODE_NAMES = {
-            "0x00 DPAD_LEFT · 路口左转",
-            "0x01 DPAD_UP · 动作栏",
-            "0x02 DPAD_RIGHT · 路口右转",
-            "0x03 DPAD_DOWN · 掉头(长按)",
-            "0x04 FACE_A · 选择",
-            "0x05 FACE_B · 返回/菜单",
-            "0x06 FACE_Y · 使用道具",
-            "0x07 FACE_Z · RideOn(长按炸弹)",
-            "0x08 LS1 · 减档 / 降强度",
-            "0x09 LS2 · 减档",
-            "0x0A LS3 · drops 绑定",
-            "0x0B LF · 左电源键",
-            "0x0C RS1 · 加档 / 升强度",
-            "0x0D RS2 · 加档",
-            "0x0E RS3 · drops 绑定",
-            "0x0F RF · 右电源键",
-            "不发送"};
-    static final String[] ANALOG_NAMES = {"LH 左横向 (0x10)", "RH 右横向 (0x11)", "LV 左纵向 (0x12)", "RV 右纵向 (0x13)", "不发送"};
+    /** 手柄键码 0..15；对应的 Zwift 默认动作见 R.array.keycode_actions。 */
+    static final String[] KEYCODES = {
+            "0x00 DPAD_LEFT", "0x01 DPAD_UP", "0x02 DPAD_RIGHT", "0x03 DPAD_DOWN",
+            "0x04 FACE_A", "0x05 FACE_B", "0x06 FACE_Y", "0x07 FACE_Z",
+            "0x08 LS1", "0x09 LS2", "0x0A LS3", "0x0B LF",
+            "0x0C RS1", "0x0D RS2", "0x0E RS3", "0x0F RF"};
 
-    static final String[] BG_THEMES = {"Zwift 橙", "深色", "浅色"};
     static final int BG_ZWIFT = 0, BG_DARK = 1, BG_LIGHT = 2;
 
-    static final String[] KEY_STYLES = {"仿真", "简约"};
     static final int KEY_REAL = 0, KEY_SIMPLE = 1;
 
-    static final String[] PRESETS = {"Zwift Ride（明文）", "Zwift Play（加密）", "Zwift Click（加密）", "自定义"};
     static final String[] FORMATS = {"0x23 RideKeyPadStatus", "0x07 PlayKeyPadStatus", "0x37 ClickKeyPadStatus"};
     static final int[] FORMAT_OPCODES = {0x23, 0x07, 0x37};
 
@@ -55,6 +38,7 @@ final class Prefs {
     boolean holdGuide;
     int bgTheme;
     int keyStyle;
+    int lang;                                         // L10n.SYSTEM / EN / ZH
 
     Prefs(Context ctx) {
         sp = ctx.getSharedPreferences("cfg", Context.MODE_PRIVATE);
@@ -80,6 +64,7 @@ final class Prefs {
         holdGuide = sp.getBoolean("holdGuide", true);
         bgTheme = sp.getInt("bgTheme", BG_ZWIFT);
         keyStyle = sp.getInt("keyStyle", KEY_REAL);
+        lang = sp.getInt("lang", L10n.SYSTEM);
     }
 
     void save() {
@@ -91,7 +76,8 @@ final class Prefs {
                 .putInt("analogRange", analogRange)
                 .putBoolean("vibrate", vibrate).putBoolean("eventToast", eventToast).putBoolean("autoStart", autoStart)
                 .putBoolean("holdGuide", holdGuide)
-                .putInt("bgTheme", bgTheme).putInt("keyStyle", keyStyle);
+                .putInt("bgTheme", bgTheme).putInt("keyStyle", keyStyle)
+                .putInt("lang", lang);
         for (int i = 0; i < DIGITAL.length; i++) e.putInt("map_" + DIGITAL[i], digital[i]);
         e.apply();
     }
@@ -122,6 +108,25 @@ final class Prefs {
     int digitalIndex(String control) {
         for (int i = 0; i < DIGITAL.length; i++) if (DIGITAL[i].equals(control)) return i;
         return -1;
+    }
+
+    /** 设置页的键码选项："0x00 DPAD_LEFT · 路口左转"…，最后一项为“不发送”。 */
+    static String[] keycodeNames(Resources r) {
+        String[] actions = r.getStringArray(R.array.keycode_actions);
+        String[] out = new String[KEYCODES.length + 1];
+        for (int i = 0; i < KEYCODES.length; i++) out[i] = KEYCODES[i] + " · " + actions[i];
+        out[KEYCODES.length] = r.getString(R.string.key_none);
+        return out;
+    }
+
+    /** 键码名（去掉 0x 前缀），如 LS1、FACE_Y；未分配时返回 null。 */
+    static String keyName(int key) {
+        return key >= 0 && key < KEYCODES.length ? KEYCODES[key].substring(5) : null;
+    }
+
+    /** 键码在 Zwift 默认绑定中的动作，未分配时返回“未分配”。 */
+    static String actionText(Resources r, int key) {
+        return key >= 0 && key < KEYCODES.length ? r.getStringArray(R.array.keycode_actions)[key] : r.getString(R.string.unassigned);
     }
 
     ZwiftPeripheral.Config toConfig() {
