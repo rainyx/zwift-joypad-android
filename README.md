@@ -92,6 +92,10 @@ app/src/main/java/com/zwiftjoystick/
 - Verified with real Zwift (macOS): pairing as a Controls device, connection, device info, input configuration, battery, and haptic events.
 - The Ride preset (unencrypted) is the default and the one that's been tested. The Play / Click presets (encrypted) are experimental.
 
+## License
+
+[MIT](LICENSE) © 2026 rainyx
+
 ---
 
 <a name="中文"></a>
@@ -189,3 +193,7 @@ app/src/main/java/com/zwiftjoystick/
 
 - 已在真实 Zwift（macOS）上验证：能作为控制器配对、连接，设备信息、输入配置、电量、震动事件都正常。
 - 默认的 Ride 预设（不加密）是已测试的模式；Play / Click 预设（加密）仍属实验性质。
+
+## 许可证
+
+[MIT](LICENSE) © 2026 rainyx
