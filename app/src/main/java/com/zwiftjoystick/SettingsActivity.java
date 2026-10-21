@@ -145,6 +145,9 @@ public class SettingsActivity extends Activity {
         Spinner bgSpinner = spinner(Prefs.BG_THEMES, p.bgTheme);
         bgSpinner.setOnItemSelectedListener(new SimpleSelect(pos -> p.bgTheme = pos));
         row(look, "主界面背景", "Zwift 橙 / 深色 / 浅色（会记住选择）", bgSpinner);
+        Spinner keySpinner = spinner(Prefs.KEY_STYLES, p.keyStyle);
+        keySpinner.setOnItemSelectedListener(new SimpleSelect(pos -> p.keyStyle = pos));
+        row(look, "按键外观", "仿真：还原手柄机身；简约：只保留按键并放大，方便触摸（不影响 ZL/ZR）", keySpinner);
 
         LinearLayout fb = card(col, "反馈与行为");
         row(fb, "手机震动", "收到 Zwift 0x12 震动请求时振动", toggle(p.vibrate, v -> p.vibrate = v));

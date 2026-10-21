@@ -210,6 +210,7 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         leftBody = blank(new ControllerBody(this, CYAN));
         leftBody.setShadowColor(shadowCol);
         leftBody.setMotionEventSplittingEnabled(true);
+        leftBody.setMinimal(simple(), true);
         DpadView dpad = new DpadView(this, CYAN);
         String[] dirs = {"UP", "LEFT", "RIGHT", "DOWN"};
         Prefs p = app.prefs;
@@ -235,7 +236,9 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         rightBody = blank(new ControllerBody(this, CYAN));
         rightBody.setShadowColor(shadowCol);
         rightBody.setMotionEventSplittingEnabled(true);
-        ClusterLayout face = new ClusterLayout(this, 0.30f, 0.90f);
+        rightBody.setMinimal(simple(), false);
+        // 简约模式下没有凹槽边框，按键可以更大、更紧凑
+        ClusterLayout face = simple() ? new ClusterLayout(this, 0.36f, 0.86f) : new ClusterLayout(this, 0.30f, 0.90f);
         face.setMotionEventSplittingEnabled(true);
         face.addView(ball("Y", C_Y));
         face.addView(ball("Z", C_Z));
@@ -245,6 +248,11 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         rightBody.addView(chin("RS", "+"));
         col.addView(rightBody, new LinearLayout.LayoutParams(-1, 0, 1f));
         return col;
+    }
+
+    /** 按键外观为“简约”：不画机身，只保留按键并放大。 */
+    private boolean simple() {
+        return app.prefs.keyStyle == Prefs.KEY_SIMPLE;
     }
 
     /** Y/Z/A/B：彩色哑光圆键 */
@@ -262,7 +270,8 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
     private View chin(String control, String sign) {
         Prefs p = app.prefs;
         int idx = p.digitalIndex(control);
-        PadButton b = new PadButton(this, sign, CYAN).setStyle(PadButton.STYLE_CHIN).setGlow(CYAN);
+        PadButton b = new PadButton(this, sign, CYAN).setStyle(PadButton.STYLE_CHIN).setGlow(CYAN)
+                .setPlate(simple());
         b.setOnPress(down -> app.peripheral.setButton(p.digital[idx], down));
         int key = p.digital[idx];
         hints.add(b, key < 16 ? actionText(key) : "未分配", CYAN);

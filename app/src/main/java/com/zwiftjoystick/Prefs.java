@@ -35,6 +35,9 @@ final class Prefs {
     static final String[] BG_THEMES = {"Zwift 橙", "深色", "浅色"};
     static final int BG_ZWIFT = 0, BG_DARK = 1, BG_LIGHT = 2;
 
+    static final String[] KEY_STYLES = {"仿真", "简约"};
+    static final int KEY_REAL = 0, KEY_SIMPLE = 1;
+
     static final String[] PRESETS = {"Zwift Ride（明文）", "Zwift Play（加密）", "Zwift Click（加密）", "自定义"};
     static final String[] FORMATS = {"0x23 RideKeyPadStatus", "0x07 PlayKeyPadStatus", "0x37 ClickKeyPadStatus"};
     static final int[] FORMAT_OPCODES = {0x23, 0x07, 0x37};
@@ -50,6 +53,7 @@ final class Prefs {
     int analogRange;
     boolean vibrate, eventToast, autoStart;
     int bgTheme;
+    int keyStyle;
 
     Prefs(Context ctx) {
         sp = ctx.getSharedPreferences("cfg", Context.MODE_PRIVATE);
@@ -73,6 +77,7 @@ final class Prefs {
         eventToast = sp.getBoolean("eventToast", true);
         autoStart = sp.getBoolean("autoStart", true);
         bgTheme = sp.getInt("bgTheme", BG_ZWIFT);
+        keyStyle = sp.getInt("keyStyle", KEY_REAL);
     }
 
     void save() {
@@ -83,7 +88,7 @@ final class Prefs {
                 .putBoolean("zlInvert", zlInvert).putBoolean("zrInvert", zrInvert)
                 .putInt("analogRange", analogRange)
                 .putBoolean("vibrate", vibrate).putBoolean("eventToast", eventToast).putBoolean("autoStart", autoStart)
-                .putInt("bgTheme", bgTheme);
+                .putInt("bgTheme", bgTheme).putInt("keyStyle", keyStyle);
         for (int i = 0; i < DIGITAL.length; i++) e.putInt("map_" + DIGITAL[i], digital[i]);
         e.apply();
     }

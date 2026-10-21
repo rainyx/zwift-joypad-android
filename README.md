@@ -21,6 +21,7 @@ Turn your Android phone into a virtual **Zwift Ride–style controller**. The ap
   - remap any on-screen control to any controller key code;
   - choose the analog channel for each paddle, invert it, and set its range;
   - background theme: Zwift orange / dark / light;
+  - button style: *Realistic* (full controller body) or *Simple* (buttons only, enlarged for easier touch; ZL/ZR unchanged);
   - vibration, event toasts, auto-start advertising;
   - device emulation presets.
 - **Protocol log** screen with copy/clear, also mirrored to logcat (`adb logcat -s ZwiftJoystick`).
@@ -28,6 +29,10 @@ Turn your Android phone into a virtual **Zwift Ride–style controller**. The ap
 | Button hints | Dark theme | Light theme |
 |---|---|---|
 | ![Hints](docs/screenshots/hints.png) | ![Dark](docs/screenshots/main_theme1.png) | ![Light](docs/screenshots/main_theme2.png) |
+
+| Simple button style |
+|---|
+| ![Simple](docs/screenshots/main_simple.png) |
 
 | Settings | Log |
 |---|---|
@@ -123,6 +128,7 @@ app/src/main/java/com/zwiftjoystick/
   - 每个屏幕按键都可以改成任意手柄键码；
   - 每个拨片可以选择模拟通道、反向、调整满量程；
   - 背景主题：Zwift 橙 / 深色 / 浅色；
+  - 按键外观：仿真（完整机身）/ 简约（只保留按键并放大，方便触摸；不影响 ZL/ZR）；
   - 手机震动、事件提示、启动时自动广播；
   - 设备模拟预设。
 - **协议日志页**：可复制、清空，同时输出到 logcat（`adb logcat -s ZwiftJoystick`）。
@@ -130,6 +136,10 @@ app/src/main/java/com/zwiftjoystick/
 | 按键说明 | 深色主题 | 浅色主题 |
 |---|---|---|
 | ![按键说明](docs/screenshots/hints.png) | ![深色](docs/screenshots/main_theme1.png) | ![浅色](docs/screenshots/main_theme2.png) |
+
+| 简约按键外观 |
+|---|
+| ![简约](docs/screenshots/main_simple.png) |
 
 | 设置 | 日志 |
 |---|---|

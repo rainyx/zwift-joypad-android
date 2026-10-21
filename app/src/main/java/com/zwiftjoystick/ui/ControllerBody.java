@@ -45,6 +45,11 @@ public class ControllerBody extends ViewGroup {
     // 本次布局计算出的几何
     private float S, cx, cy;
 
+    /** 简约模式：不画机身，只摆放按键（凹槽控件放大，下巴键移到内侧） */
+    private boolean minimal;
+    private boolean chinRight;
+    private final RectF wellRect = new RectF(), chinRect = new RectF();
+
     public ControllerBody(Context ctx, int ledColor) {
         super(ctx);
         this.ledColor = ledColor;
@@ -61,10 +66,18 @@ public class ControllerBody extends ViewGroup {
         invalidate();
     }
 
+    /** 简约模式；chinRight 为下巴键（−/＋）放在凹槽控件的右侧，否则放左侧。 */
+    public void setMinimal(boolean on, boolean chinRight) {
+        minimal = on;
+        this.chinRight = chinRight;
+        requestLayout();
+        invalidate();
+    }
+
     public void setLedState(int state) {
         if (ledState == state) return;
         ledState = state;
-        if (state == LED_ADVERTISING) startBreath();
+        if (state == LED_ADVERTISING && !minimal) startBreath();
         else stopBreath();
         invalidate();
     }
@@ -98,6 +111,21 @@ public class ControllerBody extends ViewGroup {
         S = Math.min(w * 0.95f, h / 1.0f);
         cx = w / 2f;
         cy = h / 2f - S * 0.05f;
+        if (minimal) {
+            // 凹槽控件 D×D，旁边是 0.30D×0.56D 的下巴键，间隔 0.08D，整体居中
+            float D = Math.min(h * 0.94f, w * 0.96f / 1.38f);
+            float cw = D * 0.30f, ch = D * 0.56f, gap = D * 0.08f;
+            float left = (w - (D + gap + cw)) / 2f, top = (h - D) / 2f;
+            float wellL = chinRight ? left : left + cw + gap;
+            float chinL = chinRight ? left + D + gap : left;
+            wellRect.set(wellL, top, wellL + D, top + D);
+            chinRect.set(chinL, h / 2f - ch / 2f, chinL + cw, h / 2f + ch / 2f);
+        } else {
+            float rr = recessR(), wy = cy - S * 0.03f;
+            wellRect.set(cx - rr, wy - rr, cx + rr, wy + rr);
+            float cw = S * 0.32f, ch = S * 0.22f, top = cy + S * 0.27f;
+            chinRect.set(cx - cw / 2, top, cx + cw / 2, top + ch);
+        }
     }
 
     /** 凹槽半对角线 */
@@ -109,9 +137,8 @@ public class ControllerBody extends ViewGroup {
     protected void onMeasure(int wSpec, int hSpec) {
         int w = MeasureSpec.getSize(wSpec), h = MeasureSpec.getSize(hSpec);
         geometry(w, h);
-        int well = (int) (recessR() * 2);
-        if (getChildCount() > 0) getChildAt(0).measure(exact(well), exact(well));
-        if (getChildCount() > 1) getChildAt(1).measure(exact((int) (S * 0.32f)), exact((int) (S * 0.22f)));
+        if (getChildCount() > 0) getChildAt(0).measure(exact((int) wellRect.width()), exact((int) wellRect.height()));
+        if (getChildCount() > 1) getChildAt(1).measure(exact((int) chinRect.width()), exact((int) chinRect.height()));
         setMeasuredDimension(w, h);
     }
 
@@ -122,17 +149,13 @@ public class ControllerBody extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         geometry(r - l, b - t);
-        float rr = recessR();
-        float wy = cy - S * 0.03f;
-        if (getChildCount() > 0) {
-            getChildAt(0).layout((int) (cx - rr), (int) (wy - rr), (int) (cx + rr), (int) (wy + rr));
-        }
-        if (getChildCount() > 1) {
-            View chin = getChildAt(1);
-            float cw = S * 0.32f, ch = S * 0.22f, top = cy + S * 0.27f;
-            chin.layout((int) (cx - cw / 2), (int) top, (int) (cx + cw / 2), (int) (top + ch));
-        }
+        if (getChildCount() > 0) layout(getChildAt(0), wellRect);
+        if (getChildCount() > 1) layout(getChildAt(1), chinRect);
         buildShape();
+    }
+
+    private static void layout(View v, RectF r) {
+        v.layout((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
     }
 
     private void buildShape() {
@@ -173,7 +196,7 @@ public class ControllerBody extends ViewGroup {
 
     @Override
     protected void onDraw(Canvas c) {
-        if (S <= 0) return;
+        if (S <= 0 || minimal) return;
         // 落在橙色背景上的柔和投影
         shadow.setColor(Color.argb(1, 0, 0, 0));
         shadow.setShadowLayer(S * 0.09f, 0, S * 0.05f, shadowColor);

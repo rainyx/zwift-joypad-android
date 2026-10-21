@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -41,6 +42,9 @@ public class PadButton extends View {
     private final int color;
     private int style = STYLE_BALL;
     private int glow = Color.CYAN;
+    private final Paint plateP = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Path plateClip = new Path();
+    private boolean plate;
     private boolean down;
     private OnPress listener;
 
@@ -65,6 +69,12 @@ public class PadButton extends View {
     /** STYLE_CHIN 按下时符号的发光色。 */
     public PadButton setGlow(int c) {
         glow = c;
+        return this;
+    }
+
+    /** STYLE_CHIN 自带一块黑色底板（简约模式下没有机身托底时使用）。 */
+    public PadButton setPlate(boolean on) {
+        plate = on;
         return this;
     }
 
@@ -111,18 +121,32 @@ public class PadButton extends View {
         float w = getWidth(), h = getHeight(), cx = w / 2f, cy = h / 2f;
         float m = Math.min(w, h);
         rect.set(0, 0, w, h);
+        if (plate) {
+            plateP.setShader(new LinearGradient(0, 0, 0, h, Color.rgb(44, 45, 48), Color.rgb(20, 21, 23),
+                    Shader.TileMode.CLAMP));
+            plateP.setShadowLayer(m * 0.10f, 0, m * 0.05f, Color.argb(150, 0, 0, 0));
+            c.drawRoundRect(rect, m * 0.30f, m * 0.30f, plateP);
+        }
         if (down) {
             dim.setColor(Color.argb(90, 0, 0, 0));
             c.drawRoundRect(rect, m * 0.35f, m * 0.35f, dim);
         }
         // 打孔点阵（避开中间符号）：每个点都有内阴影和下缘反光
         float step = m * 0.12f, dr = m * 0.028f;
+        c.save();
+        if (plate) {
+            // 点阵不越出底板的圆角
+            plateClip.reset();
+            plateClip.addRoundRect(m * 0.04f, m * 0.04f, w - m * 0.04f, h - m * 0.04f, m * 0.26f, m * 0.26f, Path.Direction.CW);
+            c.clipPath(plateClip);
+        }
         for (float y = step * 0.7f; y < h - step * 0.4f; y += step) {
             for (float x = step * 0.6f; x < w - step * 0.4f; x += step) {
                 if (Math.abs(x - cx) < m * 0.30f && Math.abs(y - cy) < m * 0.24f) continue;
                 Grain.hole(c, x, y, dr, down ? 0.7f : 1f, dots);
             }
         }
+        c.restore();
         // − / ＋
         float a = m * 0.17f;
         sign.setStrokeWidth(m * 0.075f);
