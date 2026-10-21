@@ -52,6 +52,7 @@ final class Prefs {
     boolean zlInvert, zrInvert;
     int analogRange;
     boolean vibrate, eventToast, autoStart;
+    boolean holdGuide;
     int bgTheme;
     int keyStyle;
 
@@ -76,6 +77,7 @@ final class Prefs {
         vibrate = sp.getBoolean("vibrate", true);
         eventToast = sp.getBoolean("eventToast", true);
         autoStart = sp.getBoolean("autoStart", true);
+        holdGuide = sp.getBoolean("holdGuide", true);
         bgTheme = sp.getInt("bgTheme", BG_ZWIFT);
         keyStyle = sp.getInt("keyStyle", KEY_REAL);
     }
@@ -88,6 +90,7 @@ final class Prefs {
                 .putBoolean("zlInvert", zlInvert).putBoolean("zrInvert", zrInvert)
                 .putInt("analogRange", analogRange)
                 .putBoolean("vibrate", vibrate).putBoolean("eventToast", eventToast).putBoolean("autoStart", autoStart)
+                .putBoolean("holdGuide", holdGuide)
                 .putInt("bgTheme", bgTheme).putInt("keyStyle", keyStyle);
         for (int i = 0; i < DIGITAL.length; i++) e.putInt("map_" + DIGITAL[i], digital[i]);
         e.apply();

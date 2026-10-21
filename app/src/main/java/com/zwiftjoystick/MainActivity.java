@@ -1,6 +1,7 @@
 package com.zwiftjoystick;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,7 +12,9 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -46,11 +49,20 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
     // 当前背景主题下的配色（buildUi 时确定）
     private int fg, fgDim, shadowCol;
     private final Runnable clearEvent = this::fadeOutEvent;
+    /** 按住空白处多久显示按键说明 */
+    private static final long HINT_HOLD_MS = 1500;
+    private float holdX, holdY, touchSlop;
+    private final Runnable showHints = () -> {
+        hints.show();
+        hints.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = App.get();
+        // 手指按住时会自然漂移，系统 touchSlop（约 8dp）太严，会悄悄取消计时
+        touchSlop = 48 * getResources().getDisplayMetrics().density;
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         requestPerms();
         if (app.prefs.autoStart && !app.isRunning()) app.startAdvertising();
@@ -156,9 +168,33 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         return frame;
     }
 
-    /** 空白区域：点击切换按键说明层。 */
+    /** 空白区域：按住 1.5 秒显示按键说明层，松开隐藏。 */
+    @SuppressLint("ClickableViewAccessibility")
     private <T extends View> T blank(T v) {
-        v.setOnClickListener(x -> hints.toggle());
+        if (!app.prefs.holdGuide) return v;
+        v.setOnTouchListener((x, e) -> {
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    holdX = e.getRawX();
+                    holdY = e.getRawY();
+                    x.removeCallbacks(showHints);
+                    x.postDelayed(showHints, HINT_HOLD_MS);
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    // 说明层出现前手指滑开，视为放弃
+                    if (!hints.isShowing() && Math.hypot(e.getRawX() - holdX, e.getRawY() - holdY) > touchSlop) {
+                        x.removeCallbacks(showHints);
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    x.removeCallbacks(showHints);
+                    if (hints.isShowing()) hints.hide();
+                    return true;
+                default:
+                    return true;
+            }
+        });
         return v;
     }
 
@@ -173,7 +209,7 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         eventView.setTextSize(14);
         eventView.setGravity(Gravity.CENTER);
         eventView.setSingleLine();
-        showIdleHint();
+        if (app.prefs.holdGuide) showIdleHint();
         bar.addView(eventView, new LinearLayout.LayoutParams(0, -2, 1f));
 
         TextView menu = new TextView(this);
@@ -191,7 +227,7 @@ public class MainActivity extends Activity implements ZwiftPeripheral.Listener {
         eventView.animate().cancel();
         eventView.setAlpha(1f);
         eventView.setTextColor(fgDim);
-        eventView.setText("轻点空白处查看按键说明");
+        eventView.setText("长按空白处查看按键说明");
         eventView.removeCallbacks(clearEvent);
         eventView.postDelayed(clearEvent, 2000);
     }

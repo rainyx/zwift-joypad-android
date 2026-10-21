@@ -38,7 +38,6 @@ public class HintOverlay extends View {
     private final Paint border = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final int[] me = new int[2], it = new int[2];
-    private final Runnable autoHide = this::hide;
     private final float density;
 
     public HintOverlay(Context ctx) {
@@ -74,21 +73,13 @@ public class HintOverlay extends View {
         return getVisibility() == VISIBLE && getAlpha() > 0f;
     }
 
-    public void toggle() {
-        if (isShowing()) hide();
-        else show();
-    }
-
     public void show() {
-        removeCallbacks(autoHide);
         setVisibility(VISIBLE);
         invalidate();
         animate().alpha(1f).setDuration(160).withEndAction(null).start();
-        postDelayed(autoHide, 5000);
     }
 
     public void hide() {
-        removeCallbacks(autoHide);
         animate().alpha(0f).setDuration(200).withEndAction(() -> setVisibility(GONE)).start();
     }
 

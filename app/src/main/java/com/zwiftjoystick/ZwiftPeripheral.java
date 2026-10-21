@@ -19,6 +19,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
+import android.os.SystemClock;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
@@ -94,6 +95,26 @@ final class ZwiftPeripheral {
     private final Context ctx;
     private final Listener listener;
     private final Handler main = new Handler(Looper.getMainLooper());
+
+    /**
+     * 保活：Zwift 一段时间收不到手柄的任何通知就会在骑行界面提示 "Connection Failure"
+     * （连接其实还在，按一下键就消失）。空闲时每秒重发一次当前按键状态，状态没变，Zwift 不会当成新的按键。
+     */
+    private static final long KEEPALIVE_MS = 1000;
+    private long lastInputTx;
+    private boolean quietTx;
+    private final Runnable keepAlive = new Runnable() {
+        @Override
+        public void run() {
+            if (isConnected() && SystemClock.uptimeMillis() - lastInputTx >= KEEPALIVE_MS) {
+                quietTx = true;
+                sendInput(1);
+                if (cfg.reportOpcode == 0x07) sendInput(0);   // Play 左右手柄各自一条
+                quietTx = false;
+            }
+            main.postDelayed(this, KEEPALIVE_MS);
+        }
+    };
     private Config cfg = new Config();
 
     private BluetoothGattServer server;
@@ -121,6 +142,7 @@ final class ZwiftPeripheral {
     void start(Config c) {
         stop();
         cfg = c;
+        main.postDelayed(keepAlive, KEEPALIVE_MS);
         BluetoothManager bm = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter adapter = bm.getAdapter();
         if (adapter == null || !adapter.isEnabled()) {
@@ -156,6 +178,7 @@ final class ZwiftPeripheral {
     }
 
     void stop() {
+        main.removeCallbacks(keepAlive);
         if (advertiser != null) {
             try {
                 advertiser.stopAdvertising(advCallback);
@@ -355,7 +378,7 @@ final class ZwiftPeripheral {
                 return;
             }
         }
-        log("TX " + opName(opcode) + " " + Hex.of(plain));
+        if (!quietTx) log("TX " + opName(opcode) + " " + Hex.of(plain));
         sendRaw(s, c, frame);
     }
 
@@ -594,6 +617,7 @@ final class ZwiftPeripheral {
                 break;
             }
         }
+        lastInputTx = SystemClock.uptimeMillis();
         for (Session s : sessions.values()) {
             if (s.handshake) sendZp(s, chAsync, op, payload);
         }

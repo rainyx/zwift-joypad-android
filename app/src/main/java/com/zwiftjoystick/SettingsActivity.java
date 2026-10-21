@@ -153,6 +153,7 @@ public class SettingsActivity extends Activity {
         row(fb, "手机震动", "收到 Zwift 0x12 震动请求时振动", toggle(p.vibrate, v -> p.vibrate = v));
         row(fb, "事件提示", "主界面顶部显示 Zwift 事件（碰撞、RideOn…）", toggle(p.eventToast, v -> p.eventToast = v));
         row(fb, "启动时自动广播", "打开 App 即开始 BLE 广播", toggle(p.autoStart, v -> p.autoStart = v));
+        row(fb, "长按显示Guide", "长按主界面空白处显示按键说明，松开隐藏", toggle(p.holdGuide, v -> p.holdGuide = v));
 
         Button reset = new Button(this);
         reset.setText("恢复默认设置");

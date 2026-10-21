@@ -16,13 +16,13 @@ Turn your Android phone into a virtual **Zwift Ride–style controller**. The ap
 - **Haptic events from Zwift**: collisions, road edge, Ride On, power-up, shift limit, hazards… The event name is shown briefly at the top of the screen and the phone vibrates (both optional).
 - **Zwift Click–inspired UI**: matte black controller bodies, a one-piece D-pad rocker, frosted Y/Z/A/B keys, textured −/＋ keys, and paddles with a raised knob. Landscape and full screen.
 - **Status LEDs**: grey when stopped, breathing yellow while advertising, solid cyan when Zwift is connected.
-- **Button hints on demand**: tap any empty area to fade in an overlay that labels every control with its Zwift action. It hides by itself after a few seconds.
+- **Button hints on demand**: press and hold any empty area to fade in an overlay that labels every control with its Zwift action. Release to hide it.
 - **Configurable**:
   - remap any on-screen control to any controller key code;
   - choose the analog channel for each paddle, invert it, and set its range;
   - background theme: Zwift orange / dark / light;
   - button style: *Realistic* (full controller body) or *Simple* (buttons only, enlarged for easier touch; ZL/ZR unchanged);
-  - vibration, event toasts, auto-start advertising;
+  - vibration, event toasts, auto-start advertising, hold-to-show button guide (on by default);
   - device emulation presets.
 - **Protocol log** screen with copy/clear, also mirrored to logcat (`adb logcat -s ZwiftJoystick`).
 
@@ -68,7 +68,7 @@ The only third-party dependency is BouncyCastle (`bcprov-jdk18on`), used for the
    - D-pad ◀ ▶: turn at intersections; ▼ (hold): U-turn
    - Y: power-up; Z (hold): Ride On bomb
    - − / ＋: shift down / up
-4. Tap an empty area at any time to see what each control does.
+4. Press and hold an empty area at any time to see what each control does.
 5. **☰ menu**: start / stop / restart advertising, send battery level, open **Log** or **Settings**.
 
 ### Tips
@@ -123,13 +123,13 @@ app/src/main/java/com/zwiftjoystick/
 - **Zwift 震动事件**：碰撞、压到路边、RideOn、道具、档位到头、路面危险等。屏幕顶部会短暂显示事件名，手机同时震动（两项都可以关闭）。
 - **仿 Zwift Click 的界面**：黑色哑光机身、一体式十字摇板、磨砂质感的 Y/Z/A/B、带纹理的 −/＋ 键、带立体旋钮的拨片；横屏全屏显示。
 - **状态灯**：停止时灰色，广播中黄灰交替呼吸，连上 Zwift 后青蓝色常亮。
-- **按需显示按键说明**：轻点任意空白处，淡入一层说明，标出每个控件对应的 Zwift 动作，几秒后自动消失。
+- **按需显示按键说明**：长按任意空白处，淡入一层说明，标出每个控件对应的 Zwift 动作；松开即隐藏。
 - **可配置**：
   - 每个屏幕按键都可以改成任意手柄键码；
   - 每个拨片可以选择模拟通道、反向、调整满量程；
   - 背景主题：Zwift 橙 / 深色 / 浅色；
   - 按键外观：仿真（完整机身）/ 简约（只保留按键并放大，方便触摸；不影响 ZL/ZR）；
-  - 手机震动、事件提示、启动时自动广播；
+  - 手机震动、事件提示、启动时自动广播、长按显示按键说明（默认开启）；
   - 设备模拟预设。
 - **协议日志页**：可复制、清空，同时输出到 logcat（`adb logcat -s ZwiftJoystick`）。
 
@@ -175,7 +175,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
    - 十字键 ◀ ▶：路口转弯；▼（长按）：掉头
    - Y：使用道具；Z（长按）：RideOn 炸弹
    - − / ＋：减档 / 加档
-4. 随时轻点空白处，查看每个控件的作用。
+4. 随时长按空白处，查看每个控件的作用。
 5. **☰ 菜单**：开始 / 停止 / 重新广播、发送电量、进入**日志**或**设置**。
 
 ### 提示
